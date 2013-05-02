@@ -1,0 +1,45 @@
+<!doctype HTML>
+<html>
+  <head>
+    <script type="text/javascript" src="../monads/monad.js"></script>
+    <script type="text/javascript" src="../moctx/moctx.js"></script>
+    <script type="text/javascript" src="../mogui.js"></script>
+    <style type="text/css">
+      html, body {
+        height: 100%;
+        margin: 0px;
+        padding: 0px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="text/javascript">
+        
+      var mogui = MOGUI()
+        .setSize(500, 1000);
+
+      function draw (box, circle) {
+        mogui
+          .clear()
+          .box(0, 0, box, box, "red", "black", 15)
+          .circle(250, 250, circle, "blue", "black")
+          .text("Sup", 230, 250, "black", "20px tahoma");
+      }
+      draw(500, 500);
+      var dilate = 1000;
+      mogui.getCanvas().onmouseover = function () {
+        dilate = 200;
+
+      };
+      mogui.getCanvas().onmouseout = function () {
+        dilate = 1000;
+      }
+      requestAnimationFrame(function step(time) {
+          requestAnimationFrame(step);
+          draw(500, 125*Math.sin(time/dilate)+125);
+        });
+
+    </script>
+  </body>
+</html>

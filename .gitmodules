@@ -1,0 +1,6 @@
+[submodule "moctx"]
+	path = moctx
+	url = git@github.com:JoshGalvin/MOCTX.git
+[submodule "monads"]
+	path = monads
+	url = https://github.com/douglascrockford/monad
