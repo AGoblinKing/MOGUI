@@ -13,14 +13,67 @@ var MOGUI = (function () {
         moctx.setStrokeStyle(stroke);
       }
   }
+
+  var iconIMGs = new Image(), loaded = false;
+  iconIMGs.src = "../images/glyphicons-halflings.png";
+  iconIMGs.onload = function() {
+    loaded = true;
+    for(var i in fineUpstandingMaleCallers) {
+      fineUpstandingMaleCallers[i]();
+    }
+  }
+  var fineUpstandingMaleCallers = [];
+  var icons = {
+    "body": [7, 0],
+    "support": [10, 5],
+    "system": [16, 0]
+  };
+
   var MOGUI = XMONAD(function (monad, value) {
     if (value === undefined) {
       return MOCTX()
     }
     return value;
   })
+    .lift("load", function(moctx, callback) {
+      if(loaded) {
+        callback();
+      } else {
+        fineUpstandingMaleCallers.push(callback);
+      }
+      return MOGUI(moctx);
+    })  
     .lifts("setSize", "hide", "show")
     .lift_values("getCanvas")
+    .lift("circleButton", function(moctx, num, radius, icon) {
+      fillStroke(moctx, "black", "black");
+      var x = moctx.getWidth() / 2,
+        y =  radius + 5 + 2 * radius * num + num*radius/5;
+
+      var ico = icons[icon];
+
+      moctx
+        .setLineWidth(5)
+        .beginPath()
+        .arc(x, y, radius-10, 0, Math.PI * 2, true)
+        .closePath()
+        .fill()
+
+      moctx
+        .beginPath()
+        .arc(x, y, radius, 0, Math.PI * 2, true)
+        .closePath()
+        .stroke()
+
+
+      if (ico !== undefined) {
+        moctx
+          .setGlobalCompositeOperation("xor")
+          .drawImage(iconIMGs, 24*ico[0], 24*ico[1], 24, 24, x - 21, y - 21, radius*1.5, radius*1.5);
+      }
+
+      return MOGUI(moctx);
+    })
     .lift("circle", function (moctx, x, y, radius, fill, stroke) {
       fillStroke(moctx, fill, stroke);
       return MOGUI(moctx

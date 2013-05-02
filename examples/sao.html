@@ -1,0 +1,30 @@
+<!doctype HTML>
+<html>
+  <head>
+    <script type="text/javascript" src="../monads/monad.js"></script>
+    <script type="text/javascript" src="../moctx/moctx.js"></script>
+    <script type="text/javascript" src="../mogui.js"></script>
+    <style type="text/css">
+      html, body {
+        height: 100%;
+        margin: 0px;
+        padding: 0px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="text/javascript">
+        
+      var main = MOGUI()
+        .setSize(110, 500);
+
+      main.load(function() {
+        main
+          .circleButton(0, 50, "body")
+          .circleButton(1, 50, "support")
+          .circleButton(2, 50, "system");
+      });
+    </script>
+  </body>
+</html>
