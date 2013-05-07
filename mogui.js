@@ -5,15 +5,16 @@
 // MIT License
 var MOGUI = (function () {
 
-  function fillStroke(moctx, fill, stroke) {
-    if (fill !== undefined) {
-        moctx.setFillStyle(fill);
-      }
-      if (stroke !== undefined) {
-        moctx.setStrokeStyle(stroke);
-      }
+  function fillStroke(moctx) {
+    if (moctx.fill !== undefined) {
+      moctx.setFillStyle(moctx.fill);
+    }
+    if (moctx.stroke !== undefined) {
+      moctx.setStrokeStyle(moctx.stroke);
+    }
   }
 
+  // Should move this into an evented system
   var iconIMGs = new Image(), loaded = false;
   iconIMGs.src = "../images/glyphicons-halflings.png";
   iconIMGs.onload = function() {
@@ -26,12 +27,27 @@ var MOGUI = (function () {
   var icons = {
     "body": [7, 0],
     "support": [10, 5],
-    "system": [16, 0]
+    "system": [16, 0],
+    "equip": [3, 4],
+    "bag": [4, 5]
   };
+
+
+  // oh god this pattern.
+  var MOITEM = XMONAD()
+    .lift("up", function(mogui) {
+      return mogui;
+    })
+    .lift("click", function(mogui, callback) {
+      return MOITEM(
+        mogui
+          .onClick(MOITEM(mogui), callback)
+      );
+    });
 
   var MOGUI = XMONAD(function (monad, value) {
     if (value === undefined) {
-      return MOCTX()
+      return MOCTX();
     }
     return value;
   })
@@ -45,12 +61,34 @@ var MOGUI = (function () {
     })  
     .lifts("setSize", "hide", "show")
     .lift_values("getCanvas")
-    .lift("circleButton", function(moctx, num, radius, icon) {
-      fillStroke(moctx, "black", "black");
+    .lift("setColors", function (moctx, fill, stroke) {
+      moctx.fill = fill;
+      moctx.stroke = stroke;
+      return MOGUI(moctx);
+    })
+    .lift_value("getColors", function (moctx) {
+      return {"fill": moctx.fill, "stroke": moctx.stroke};
+    })
+    .lift("boxButton", function(moctx, num, text, icon) {
+      var w = 500,
+        h = 100,
+        y = h*num+num*10;
+
+      MOGUI(moctx)
+        .box(0, y, w, h, 5)
+        .ico(50, y+h/2, h/2, icon);
+
+      moctx
+        .setFont("50px sans-serif")
+        .setFillStyle("black")
+        .fillText(text, 100, y+h/1.5);
+
+      return MOITEM(MOGUI(moctx));  
+    })
+    .lift("circleButton", function (moctx, num, radius, icon) {
+      fillStroke(moctx);
       var x = moctx.getWidth() / 2,
         y =  radius + 5 + 2 * radius * num + num*radius/5;
-
-      var ico = icons[icon];
 
       moctx
         .setLineWidth(5)
@@ -65,13 +103,18 @@ var MOGUI = (function () {
         .closePath()
         .stroke()
 
+      MOGUI(moctx).ico(x, y, radius, icon);
 
-      if (ico !== undefined) {
+      return MOITEM(MOGUI(moctx));
+    })
+    .lift("ico", function (moctx, x, y, radius, icon) {
+      var ico = icons[icon];
+      if(ico !== undefined) {
         moctx
-          .setGlobalCompositeOperation("xor")
-          .drawImage(iconIMGs, 24*ico[0], 24*ico[1], 24, 24, x - 21, y - 21, radius*1.5, radius*1.5);
+          //.setGlobalCompositeOperation("xor")
+          .drawImage(iconIMGs, 24*ico[0], 24*ico[1], 24, 24, x - 21, y - 21, radius*1.5, radius*1.5)
+          //.setGlobalCompositeOperation("source-over");
       }
-
       return MOGUI(moctx);
     })
     .lift("circle", function (moctx, x, y, radius, fill, stroke) {
@@ -83,10 +126,10 @@ var MOGUI = (function () {
         .fill().stroke()
         );
     })
-    .lift("box", function (moctx, x, y, width, height, fill, stroke, radius) {
-      fillStroke(moctx, fill, stroke);
+    .lift("box", function (moctx, x, y, width, height, radius) {
+      fillStroke(moctx);
       radius = radius === undefined ? 0 : radius;
-
+      // This draws an optionally rounded corner box
       return MOGUI(moctx
         .beginPath()
         .moveTo(x + radius, y)
@@ -100,6 +143,12 @@ var MOGUI = (function () {
         .quadraticCurveTo(x, y, x + radius, y)
         .closePath()
         .fill().stroke());
+    })
+    .lift("onClick", function(moctx, moitem, callback) {
+      moctx.getCanvas().onclick = function() {
+        callback.call(undefined, moitem);
+      };
+      return MOGUI(moctx);
     })
     .lift("clear", function(moctx) {
       return MOGUI(moctx.clearRect(0, 0, moctx.getWidth(), moctx.getHeight()));

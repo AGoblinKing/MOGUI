@@ -1,6 +1,8 @@
 <!doctype HTML>
 <html>
   <head>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/three.js/r57/three.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.0.min.js"></script>
     <script type="text/javascript" src="../monads/monad.js"></script>
     <script type="text/javascript" src="../moctx/moctx.js"></script>
     <script type="text/javascript" src="../mogui.js"></script>
@@ -10,25 +12,34 @@
         margin: 0px;
         padding: 0px;
         overflow: hidden;
-        background: url(https://dl.dropboxusercontent.com/u/98222822/app/images/aincrad.jpg);
-        background-size: 100% 100%;
       }
     </style>
   </head>
   <body>
     <script type="text/javascript">
-        
+      var renderer = new THREE.WebGLRenderer(),
+        w = document.body.offsetWidth,
+        h = document.body.offsetHeight,
+        camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 10000),
+        scene = new THREE.Scene();
+
+      renderer.setSize(w, h);
+      $("body").append(renderer.domElement);
+
       var body = MOGUI()
+        .hide()
         .setSize(500, 500);
 
       var main = MOGUI()
+        .hide()
         .setSize(110, 500);
 
-      var sub = MOGUI() 
+      var sub = MOGUI()
+        .hide()
         .setSize(500, 500);
 
-      // Make this part not suck
-      main.load(function() {
+      // Make this part not suck  
+      main.load(function () {
         main
           .setColors("white", "white")
           .circleButton(0, 50, "body").up()
