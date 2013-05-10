@@ -12,14 +12,15 @@
         margin: 0px;
         padding: 0px;
         overflow: hidden;
+        background-color: #222;
       }
     </style>
   </head>
   <body>
     <script type="text/javascript">
       var renderer = new THREE.WebGLRenderer(),
-        w = document.body.offsetWidth,
-        h = document.body.offsetHeight,
+        w = window.innerWidth,
+        h = window.innerHeight,
         camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 10000),
         scene = new THREE.Scene();
 
@@ -28,15 +29,15 @@
 
       var body = MOGUI()
         .hide()
-        .setSize(500, 500);
+        .setSize(512, 512);
 
       var main = MOGUI()
         .hide()
-        .setSize(110, 500);
+        .setSize(512, 512);
 
       var sub = MOGUI()
         .hide()
-        .setSize(500, 500);
+        .setSize(512, 512);
 
       // Make this part not suck  
       main.load(function () {
@@ -55,6 +56,31 @@
           .boxButton(0, "Equipment", "equip").up()
           .boxButton(1, "Items", "bag").up()
           .boxButton(2, "Skills", "body");
+
+
+
+        // Ugh THREE API kinda sucks
+        var canvas = main.getCanvas();
+        var texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true;
+
+        var material = new THREE.MeshBasicMaterial({"map": texture});
+        var mesh = new THREE.Mesh(new THREE.CubeGeometry(canvas.width/100, canvas.height/100, 0), material);
+
+        mesh.doubleSided = true;
+        scene.add(mesh);
+        camera.position.z = 10;
+
+
+        var lastTime = 0;
+        requestAnimationFrame(function render(time) {
+          requestAnimationFrame(render);
+
+          var delta = time - lastTime;
+          lastTime = time;
+
+          renderer.render(scene, camera);
+        });
       });
     </script>
   </body>
